@@ -1,0 +1,90 @@
+import { MigrationInterface, QueryRunner } from 'typeorm';
+
+export class CreatePasturasAndAudit1760000600000 implements MigrationInterface {
+  name = 'CreatePasturasAndAudit1760000600000';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS cat_pasturas (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id uuid NULL,
+
+        nombre varchar(120) NOT NULL,
+        descripcion varchar(300) NULL,
+
+        precio_kg_ars numeric(14,4) NOT NULL DEFAULT 0,
+        precio_kg_usd numeric(14,4) NOT NULL DEFAULT 0,
+
+        activo boolean NOT NULL DEFAULT true,
+
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        deleted_at timestamptz NULL
+      );
+    `);
+
+    await queryRunner.query(`
+      CREATE INDEX IF NOT EXISTS ix_pasturas_tenant ON cat_pasturas(tenant_id);
+      CREATE INDEX IF NOT EXISTS ix_pasturas_nombre ON cat_pasturas(nombre);
+      CREATE INDEX IF NOT EXISTS ix_pasturas_activo ON cat_pasturas(activo);
+      CREATE UNIQUE INDEX IF NOT EXISTS ux_pasturas_tenant_nombre
+        ON cat_pasturas(tenant_id, lower(nombre))
+        WHERE deleted_at IS NULL;
+    `);
+
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS cat_pastura_precio_audit (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id uuid NULL,
+
+        pastura_id uuid NOT NULL REFERENCES cat_pasturas(id),
+
+        changed_at timestamptz NOT NULL DEFAULT now(),
+
+        precio_ars_anterior numeric(14,4) NOT NULL,
+        precio_ars_nuevo numeric(14,4) NOT NULL,
+        precio_usd_anterior numeric(14,4) NOT NULL,
+        precio_usd_nuevo numeric(14,4) NOT NULL,
+
+        actor_user_id uuid NULL,
+        actor_email varchar(200) NULL,
+        request_id varchar(80) NULL
+      );
+    `);
+
+    await queryRunner.query(`
+      CREATE INDEX IF NOT EXISTS ix_pastura_audit_tenant ON cat_pastura_precio_audit(tenant_id);
+      CREATE INDEX IF NOT EXISTS ix_pastura_audit_pastura ON cat_pastura_precio_audit(pastura_id);
+      CREATE INDEX IF NOT EXISTS ix_pastura_audit_changed_at ON cat_pastura_precio_audit(changed_at);
+    `);
+
+    await queryRunner.query(`
+      CREATE OR REPLACE FUNCTION set_updated_at_cat_pasturas()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        NEW.updated_at = now();
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+
+    await queryRunner.query(`
+      DROP TRIGGER IF EXISTS trg_set_updated_at_cat_pasturas ON cat_pasturas;
+      CREATE TRIGGER trg_set_updated_at_cat_pasturas
+      BEFORE UPDATE ON cat_pasturas
+      FOR EACH ROW
+      EXECUTE FUNCTION set_updated_at_cat_pasturas();
+    `);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `DROP TRIGGER IF EXISTS trg_set_updated_at_cat_pasturas ON cat_pasturas;`,
+    );
+    await queryRunner.query(
+      `DROP FUNCTION IF EXISTS set_updated_at_cat_pasturas;`,
+    );
+    await queryRunner.query(`DROP TABLE IF EXISTS cat_pastura_precio_audit;`);
+    await queryRunner.query(`DROP TABLE IF EXISTS cat_pasturas;`);
+  }
+}
