@@ -22,6 +22,7 @@
     "db:migration:run": "node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/infra/db/data-source.ts migration:run",
     "db:migration:revert": "node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/infra/db/data-source.ts migration:revert",
     "db:schema:log": "node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/infra/db/data-source.ts schema:log",
+    "db:migration:run:prod": "node ./node_modules/typeorm/cli.js -d dist/src/infra/db/data-source.js migration:run",
     "db:migration:create": "typeorm-ts-node-commonjs migration:create migrations/Manual",
     "db:seed": "node -r ts-node/register -r tsconfig-paths/register src/database/seeds/seed.ts"
   },
