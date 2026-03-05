@@ -19,8 +19,18 @@ import { ConfirmarMovimientoDto } from './dto/confirmar-movimiento.dto';
 import { Lote } from '../../maestros/lotes/entities/lote.entity';
 import { Tropa } from '../../ganaderia/tropas/entities/tropa.entity';
 import { Pastura } from '../../maestros/pasturas/entities/pastura.entity';
+import { tenantContext } from 'src/modules/tenancy/tenant-context';
+import { MotorConsumoService } from '../motor-consumo/motor-consumo.service';
 
 type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
+
+
+function currentTenantId(): string | null {
+  const store = (tenantContext as any).getStore?.();
+  const t = store?.tenantId ?? null;
+  return t ? String(t) : null;
+}
+
 
 @Injectable()
 export class OcupacionesService extends BaseCrudTenantService<Ocupacion> {
@@ -33,6 +43,8 @@ export class OcupacionesService extends BaseCrudTenantService<Ocupacion> {
     @InjectRepository(Pastura)
     private readonly pasturaRepo: Repository<Pastura>,
     private readonly dataSource: DataSource,
+    // inyectar motor de consumo para recalcular al cerrar
+    private readonly motorConsumo: MotorConsumoService,
   ) {
     super(repo);
   }
@@ -88,6 +100,15 @@ export class OcupacionesService extends BaseCrudTenantService<Ocupacion> {
   }
 
   async createOne(dto: CreateOcupacionDto) {
+    const tenantId = currentTenantId();
+    if (!tenantId) {
+      throw new AppError({
+        code: ErrorCodes.TENANT_REQUIRED,
+        message: 'Tenant requerido',
+        status: 400,
+      });
+    }
+
     if (!dto.tropas?.length) {
       throw new AppError({
         code: ErrorCodes.OCUPACION_TROPAS_REQUIRED,
@@ -155,6 +176,7 @@ export class OcupacionesService extends BaseCrudTenantService<Ocupacion> {
         const ocRepo = manager.getRepository(Ocupacion);
 
         const ocupacionEntity = ocRepo.create({
+          tenant_id: tenantId,
           loteId: dto.loteId,
           fechaDesde: dto.fecha_desde,
           fechaHasta: null,
@@ -171,6 +193,7 @@ export class OcupacionesService extends BaseCrudTenantService<Ocupacion> {
 
         const rows = dto.tropas.map((x) =>
           otRepo.create({
+            tenant_id: tenantId,
             ocupacionId: ocupacion.id,
             tropaId: x.tropaId,
             cabezasInicio: x.cabezas_inicio,
@@ -283,6 +306,11 @@ export class OcupacionesService extends BaseCrudTenantService<Ocupacion> {
         .where('id = :id', { id: ocup.loteId })
         .execute();
 
+      await this.motorConsumo.recalcularParaOcupacionTx(
+        manager,
+        ocup.id,
+        dto.tipo_cambio,
+      );
       return true;
     });
   }

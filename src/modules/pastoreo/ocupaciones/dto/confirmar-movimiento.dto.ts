@@ -32,6 +32,12 @@ export class ConfirmarMovimientoDto {
   @IsDateString()
   fecha_hasta: string;
 
+  // ✅ NUEVO: tipo de cambio enviado por el frontend
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.000001)
+  tipo_cambio: number;
+
   // opcional: si ya sabes a qué lote va después, lo guardamos como hint (post MVP se usa)
   @IsOptional()
   @IsUUID()

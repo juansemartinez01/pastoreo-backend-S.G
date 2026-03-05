@@ -29,6 +29,8 @@ import { GastosLoteModule } from './modules/agricultura/gastos-lote/gastos-lote.
 import { GastosTropaModule } from './modules/ganaderia/gastos-tropa/gastos-tropa.module';
 import { TropasModule } from './modules/ganaderia/tropas/tropas.module';
 import { OcupacionesModule } from './modules/pastoreo/ocupaciones/ocupaciones.module';
+import { EventosMuerteModule } from './modules/ganaderia/eventos-muerte/eventos-muerte.module';
+import { DivisionesTropaModule } from './modules/ganaderia/divisiones-tropa/divisiones-tropa.module';
 
 @Module({
   imports: [
@@ -71,6 +73,8 @@ import { OcupacionesModule } from './modules/pastoreo/ocupaciones/ocupaciones.mo
     GastosTropaModule,
     TropasModule,
     OcupacionesModule,
+    EventosMuerteModule,
+    DivisionesTropaModule,
   ],
   controllers: [AppController],
   providers: [

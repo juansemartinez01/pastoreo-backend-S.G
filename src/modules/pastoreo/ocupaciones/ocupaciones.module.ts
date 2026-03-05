@@ -11,10 +11,12 @@ import { OcupacionesController } from './ocupaciones.controller';
 import { Lote } from '../../maestros/lotes/entities/lote.entity';
 import { Tropa } from '../../ganaderia/tropas/entities/tropa.entity';
 import { Pastura } from '../../maestros/pasturas/entities/pastura.entity';
+import { MotorConsumoModule } from '../motor-consumo/motor-consumo.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Ocupacion, OcupacionTropa, Lote, Tropa, Pastura]),
+    MotorConsumoModule,
   ],
   controllers: [OcupacionesController],
   providers: [OcupacionesService],
