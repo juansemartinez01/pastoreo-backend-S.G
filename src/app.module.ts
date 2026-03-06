@@ -25,12 +25,15 @@ import { LotesModule } from './modules/maestros/lotes/lotes.module';
 import { ProveedoresModule } from './modules/maestros/proveedores/proveedores.module';
 import { CentrosCostoModule } from './modules/maestros/centros-costo/centros-costo.module';
 import { CategoriasModule } from './modules/maestros/categorias/categorias.module';
-import { GastosLoteModule } from './modules/agricultura/gastos-lote/gastos-lote.module';
+
 import { GastosTropaModule } from './modules/ganaderia/gastos-tropa/gastos-tropa.module';
 import { TropasModule } from './modules/ganaderia/tropas/tropas.module';
 import { OcupacionesModule } from './modules/pastoreo/ocupaciones/ocupaciones.module';
 import { EventosMuerteModule } from './modules/ganaderia/eventos-muerte/eventos-muerte.module';
 import { DivisionesTropaModule } from './modules/ganaderia/divisiones-tropa/divisiones-tropa.module';
+import { CampaniasModule } from './modules/agricultura/campanias/campanias.module';
+import { GastosCampaniaModule } from './modules/agricultura/gastos-campania/gastos-campania.module';
+import { IngresosCampaniaModule } from './modules/agricultura/ingresos-campania/ingresos-campania.module';
 
 @Module({
   imports: [
@@ -69,12 +72,15 @@ import { DivisionesTropaModule } from './modules/ganaderia/divisiones-tropa/divi
     ProveedoresModule,
     CentrosCostoModule,
     CategoriasModule,
-    GastosLoteModule,
+    
     GastosTropaModule,
     TropasModule,
     OcupacionesModule,
     EventosMuerteModule,
     DivisionesTropaModule,
+    CampaniasModule,
+    GastosCampaniaModule,
+    IngresosCampaniaModule,
   ],
   controllers: [AppController],
   providers: [

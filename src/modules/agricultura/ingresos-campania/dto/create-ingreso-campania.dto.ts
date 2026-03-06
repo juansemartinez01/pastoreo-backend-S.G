@@ -1,25 +1,18 @@
-// src/modules/agricultura/gastos-lote/dto/create-gasto-lote.dto.ts
+// src/modules/agricultura/ingresos-campania/dto/create-ingreso-campania.dto.ts
 import {
+  IsArray,
   IsDateString,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
-  IsNumber,
-  Min,
-  IsArray,
-  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateAdjuntoDto } from '../../../docs/adjuntos/dto/create-adjunto.dto';
 
-export class CreateGastoLoteDto {
+export class CreateIngresoCampaniaDto {
   @IsUUID()
-  loteId: string;
-
-  @IsOptional()
-  @IsUUID()
-  proveedorId?: string;
+  campaniaId: string;
 
   @IsUUID()
   categoriaId: string;
@@ -29,27 +22,22 @@ export class CreateGastoLoteDto {
 
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
   monto_ars: number;
 
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
   monto_usd: number;
 
   @Type(() => Number)
   @IsNumber()
-  @Min(0)
   tipo_cambio: number;
 
   @IsOptional()
   @IsString()
   @MaxLength(300)
-  notas?: string;
+  notas?: string | null;
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateAdjuntoDto)
-  adjuntos?: CreateAdjuntoDto[];
+  adjuntos?: any[];
 }
